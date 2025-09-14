@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tablero Personal 2025</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  <style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #111;
+    font-family: 'Segoe UI', sans-serif;
+    color: #fff;
+  }
+  .tab-content {
+    min-height: 60vh;
+    background-color: #111;
+  }
+  .tabs {
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+  .tabs ul {
+    border-bottom: 1px solid #444;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .tabs li {
+    margin-bottom: -1px;
+  }
+  .tabs li a {
+    display: block;
+    padding: 0.4rem 1rem;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px 8px 0 0;
+    color: #bbb;
+    transition: all 0.3s ease;
+  }
+  .tabs li a:hover,
+  .tabs li:hover a {
+    background-color: #2a2a2a !important;
+    color: #ffbf00 !important;
+  }
+  .tabs li.is-tab-active a {
+    background-color: #1e1e1e;
+    border-color: #666;
+    color: #ffdd57;
+    box-shadow: inset 0 -2px 0 #ffdd57;
+  }
+  textarea, input[type=text] {
+    width: 100%;
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+  }
+  .top-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .table {
+    background-color: transparent;
+    color: #fff;
+  }
+  .table thead {
+    background-color: #222;
+    color: #ffdd57;
+  }
+  .table thead th {
+    color: #ffdd57;
+    font-weight: bold;
+    background-color: #222;
+    border-bottom: 1px solid #444;
+  }
+  .table tbody tr:hover {
+    background-color: #1c1c1c;
+  }
+  .subtitle, .title {
+    color: #fff;
+  }
+  ul li {
+    color: #9fdf9f;
+  }
+  .table td, .table th {
+    padding: 0.75em;
+    border: none;
+    border-bottom: 1px solid #333;
+    vertical-align: top;
+    word-break: break-word;
+    white-space: normal;
+  }
+  .table.is-fullwidth {
+    table-layout: fixed;
+  }
+  </style>
+</head>
+<body>
+  <h1 class="title is-3">📋 Tablero Personal 2025</h1>
+  <div class="top-buttons">
+    <button class="button is-link" onclick="exportarDatos()">⬇ Exportar JSON</button>
+    <button class="button is-warning" onclick="exportarICS()">📅 Exportar ICS</button>
+    <input class="button is-light" type="file" id="importarArchivo" onchange="importarDatos()">
+  </div>
+  <div class="tabs is-boxed is-fullwidth">
+    <ul>
+      <li class="is-tab-active" onclick="abrirTab('emociones')"><a>🧠 Emociones & Retrospectiva</a></li>
+      <li onclick="abrirTab('objetivos')"><a>🎯 Objetivos & Macroplan</a></li>
+      <li onclick="abrirTab('microacciones')"><a>⚙️ Microacciones & Hábitos</a></li>
+      <li onclick="abrirTab('historial')"><a>🗓 Historial & Cierre Semana</a></li>
+    </ul>
+  </div>
+  <div id="emociones" class="tab-content">
+    <h2 class="subtitle is-4">🌈 Emociones ↔ Acciones</h2>
+    <table class="table is-fullwidth">
+      <thead><tr><th>Positivas</th><th>Acción</th></tr></thead>
+      <tbody id="emociones-positivas"></tbody>
+    </table>
+    <h2 class="subtitle is-4">🥲 Emociones Negativas</h2>
+    <table class="table is-fullwidth">
+      <thead><tr><th>Negativas</th><th>Qué necesito</th></tr></thead>
+      <tbody id="emociones-negativas"></tbody>
+    </table>
+    <h2 class="subtitle is-4">🔍 FODA Personal</h2>
+    <table class="table is-fullwidth">
+      <thead><tr><th>Fortalezas</th><th>Oportunidades</th><th>Debilidades</th><th>Amenazas</th></tr></thead>
+      <tbody id="foda"></tbody>
+    </table>
+    <h2 class="subtitle is-4">🚀 Decisiones Macro</h2>
+    <ul id="decisiones-lista"></ul>
+  </div>
+  <div id="objetivos" class="tab-content is-hidden">
+    <h2 class="subtitle is-4">🎯 Objetivos 2025</h2>
+    <table class="table is-fullwidth">
+      <thead><tr><th>Objetivo</th><th>Macro Paso</th><th>Meta</th></tr></thead>
+      <tbody id="objetivos-body"></tbody>
+    </table>
+  </div>
+  <div id="microacciones" class="tab-content is-hidden">
+    <h2 class="subtitle is-4">📅 Plan Semanal + Hábitos</h2>
+    <h2 class="subtitle is-5">⚙️ Microacciones Detalladas</h2>
+    <table id="microacciones" class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th>Objetivo</th>
+          <th>Microacción</th>
+          <th>Cuándo</th>
+          <th>Dónde</th>
+          <th>Duración</th>
+          <th>ICS</th>
+          <th>KPI</th>
+          <th>Target</th>
+          <th>Cumplimiento</th>
+        </tr>
+      </thead>
+      <tbody id="microacciones-body"></tbody>
+    </table>
+    <h2 class="subtitle is-5">🌿 Hábitos Detallados</h2>
+      <table id="habitos" class="table is-fullwidth">
+        <thead>
+          <tr>
+            <th>Objetivo</th>
+            <th>Microacción</th>
+            <th>Cuándo</th>
+            <th>Dónde</th>
+            <th>Duración</th>
+            <th>ICS</th>
+            <th>KPI</th>
+            <th>Target</th>
+            <th>Cumplimiento</th>
+          </tr>
+        </thead>
+        <tbody id="habitos-body"></tbody>
+      </table>
+    </div>
+  <div id="historial" class="tab-content is-hidden">
+    <h2 class="subtitle is-4">📊 Historial Semanal</h2>
+    <table id="historial-body" class="table is-fullwidth">
+      <thead>
+        <tr>
+          <th>Semana</th>
+          <th>Microacción / Hábito</th>
+          <th>KPI</th>
+          <th>Target</th>
+          <th>Cumplimiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Las filas se agregarán dinámicamente -->
+      </tbody>
+    </table>
+
+    <h2 class="subtitle is-4">📝 Retro Semanal</h2>
+    <textarea id="retro-semanal" rows="6" placeholder="Escribí acá tu reflexión de esta semana..."></textarea>
+    <div class="top-buttons" style="margin-top: 1rem;">
+      <button class="button is-success" onclick="cerrarSemana()">✅ Cerrar Semana</button>
+    </div>
+  </div> <!-- Cierre de historial-->
+  <script>
+    let datosFlujo = {
+      emociones: { positivas: [], negativas: [], retrospectiva: "" },
+      foda: { fortalezas: [], oportunidades: [], debilidades: [], amenazas: [] },
+      decisiones: [],
+      objetivos: [],
+      microacciones: [],
+      habitos: [],
+      historial: [],
+      retro: ""
+    };
+
+    function cargarDatosDesdeJSON() {
+      cargarTabla("emociones-positivas", datosFlujo.emociones.positivas);
+      cargarTabla("emociones-negativas", datosFlujo.emociones.negativas);
+      cargarTabla("foda", [datosFlujo.foda.fortalezas, datosFlujo.foda.oportunidades, datosFlujo.foda.debilidades, datosFlujo.foda.amenazas]);
+      cargarLista("decisiones-lista", datosFlujo.decisiones);
+      cargarTablaObjetivos("objetivos-body", datosFlujo.objetivos);
+      cargarTablaHabitos("habitos", datosFlujo.habitos);
+      cargarTablaMicroacciones("microacciones-body", datosFlujo.microacciones);
+      cargarHistorial(); // 👈🏼 esta línea nueva
+    }
+
+    function cargarTablaMicroacciones(id, data) {
+      const tbody = document.getElementById(id);
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      data.map(normalizarItem).forEach((row, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.objetivo}</td>
+          <td>${row.microaccion}</td>
+          <td>${row.cuando}</td>
+          <td>${row.donde}</td>
+          <td>${row.duracion}</td>
+          <td><button class="button is-small is-light" onclick='descargarICS(${JSON.stringify(row)})'>📅</button></td>
+          <td>${row.kpi}</td>
+          <td>${row.target}</td>
+          <td><input type="text" class="input is-small" value="${row.cumplimiento}" data-index="${i}" data-tipo="microaccion"></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function cargarTablaHabitos(id, data) {
+      const tbody = document.getElementById(`${id}-body`);
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      data.map(normalizarItem).forEach((row, i) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.objetivo}</td>
+          <td>${row.microaccion}</td>
+          <td>${row.cuando}</td>
+          <td>${row.donde}</td>
+          <td>${row.duracion}</td>
+          <td><button class="button is-small is-light" onclick='descargarICS(${JSON.stringify(row)})'>📅</button></td>
+          <td>${row.kpi}</td>
+          <td>${row.target}</td>
+          <td><input type="text" class="input is-small" value="${row.cumplimiento}" data-index="${i}" data-tipo="habito"></td>`;
+        tbody.appendChild(tr);
+      });
+    } // 👈🏼 este faltaba
+
+    function cargarTablaObjetivos(id, data) {
+      const tbody = document.getElementById(id);
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.objetivo}</td>
+          <td>${row["macro paso"]}</td>
+          <td>${row.meta}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function cargarTabla(id, data) {
+      const tbody = document.getElementById(id);
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        if (Array.isArray(row)) {
+          row.forEach(cell => {
+            const td = document.createElement("td");
+            td.textContent = cell;
+            tr.appendChild(td);
+          });
+        } else {
+          for (const key in row) {
+            const td = document.createElement("td");
+            td.textContent = row[key];
+            tr.appendChild(td);
+          }
+        }
+        tbody.appendChild(tr);
+      });
+    }
+
+    function cargarLista(id, items) {
+      const ul = document.getElementById(id);
+      if (!ul) return;
+      ul.innerHTML = "";
+      items.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+    }
+
+    function abrirTab(id) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('is-hidden'));
+      document.getElementById(id).classList.remove('is-hidden');
+      document.querySelectorAll('.tabs li').forEach(li => li.classList.remove('is-tab-active'));
+      event.target.closest('li').classList.add('is-tab-active');
+    }
+
+    function recolectarDatosDesdeDOM() {
+      datosFlujo.emociones.positivas = obtenerFilasComoArrays("emociones-positivas");
+      datosFlujo.emociones.negativas = obtenerFilasComoArrays("emociones-negativas");
+      const fodaFila = document.querySelectorAll("#foda tr")[0]?.children;
+      if (fodaFila && fodaFila.length === 4) {
+        datosFlujo.foda.fortalezas = fodaFila[0].textContent.split(",").map(s => s.trim());
+        datosFlujo.foda.oportunidades = fodaFila[1].textContent.split(",").map(s => s.trim());
+        datosFlujo.foda.debilidades = fodaFila[2].textContent.split(",").map(s => s.trim());
+        datosFlujo.foda.amenazas = fodaFila[3].textContent.split(",").map(s => s.trim());
+      }
+      datosFlujo.decisiones = Array.from(document.querySelectorAll("#decisiones-lista li")).map(li => li.textContent.trim());
+      datosFlujo.objetivos = obtenerFilasComoObjetos("objetivos");
+      datosFlujo.microacciones = obtenerFilasComoObjetos("microacciones-body").map(desnormalizarMicroaccion);
+      datosFlujo.habitos = obtenerFilasComoObjetos("habitos-body").map(desnormalizarHabito);
+    }
+
+    function obtenerFilasComoArrays(id) {
+      return Array.from(document.querySelectorAll(`#${id} tr`)).map(tr =>
+        Array.from(tr.children).map(td => td.textContent.trim())
+      );
+    }
+
+    function obtenerFilasComoObjetos(id) {
+      const rows = [];
+      const tbody = document.getElementById(id);
+      const campos = [
+        "objetivo", "microacción", "cuándo", "dónde", "duración",
+        "ics", "kpi", "target", "cumplimiento"
+      ];
+
+      tbody.querySelectorAll("tr").forEach(tr => {
+        const celdas = Array.from(tr.children);
+        const obj = {};
+        campos.forEach((campo, i) => {
+          const input = celdas[i].querySelector("input");
+          obj[campo] = input ? input.value.trim() : celdas[i].textContent.trim();
+        });
+        rows.push(obj);
+      });
+
+      return rows;
+    }
+
+    function exportarDatos() {
+      recolectarDatosDesdeDOM();
+      const datos = JSON.stringify(datosFlujo, null, 2);
+      const blob = new Blob([datos], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Tablero-personal-2025.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importarDatos() {
+      const input = document.getElementById("importarArchivo");
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          datosFlujo = JSON.parse(e.target.result);
+          alert("✅ Datos importados correctamente");
+          cargarDatosDesdeJSON();
+        } catch (err) {
+          alert("❌ Error al importar el JSON");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+  function exportarICS() {
+    recolectarDatosDesdeDOM();
+
+    const generarICS = (evento, index, tipo) => {
+      const cuando = evento["cuándo"];
+      const duracion = evento["duración"];
+      const donde = evento["dónde"];
+      const titulo = evento["microacción"] || evento["hábito"];
+      const objetivo = evento["objetivo"];
+
+      if (!cuando || !duracion || !donde || !titulo) return;
+
+      const [diaSemana, hora] = cuando.split(" ");
+      const dias = {
+        "lunes": 1, "martes": 2, "miércoles": 3, "jueves": 4,
+        "viernes": 5, "sábado": 6, "domingo": 0
+      };
+      const ahora = new Date();
+      const targetDia = (7 + dias[diaSemana.toLowerCase()] - ahora.getDay()) % 7;
+      const inicio = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + targetDia);
+
+      const [hh, mm] = hora.split(":").map(Number);
+      inicio.setHours(hh, mm, 0);
+
+      const duracionMin = parseInt(duracion.replace("min", "").replace("hs", "").trim()) || 60;
+      const fin = new Date(inicio.getTime() + duracionMin * 60000);
+
+      const formato = (fecha) =>
+        fecha.toISOString().replace(/[-:]/g, "").split(".")[0];
+
+      const uid = `${Date.now()}-${Math.random().toString(36).substring(2, 10)}@tablero2025`;
+      const timestamp = formato(new Date());
+      const inicioStr = formato(inicio);
+      const finStr = formato(fin);
+
+      const ics = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Coach Salud//Tablero Personal//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "BEGIN:VTIMEZONE",
+        "TZID:America/Argentina/Buenos_Aires",
+        "X-LIC-LOCATION:America/Argentina/Buenos_Aires",
+        "BEGIN:STANDARD",
+        "TZOFFSETFROM:-0300",
+        "TZOFFSETTO:-0300",
+        "TZNAME:-03",
+        "DTSTART:19700101T000000",
+        "END:STANDARD",
+        "END:VTIMEZONE",
+        "BEGIN:VEVENT",
+        `UID:${uid}`,
+        `DTSTAMP:${timestamp}Z`,
+        `DTSTART;TZID=America/Argentina/Buenos_Aires:${inicioStr}`,
+        `DTEND;TZID=America/Argentina/Buenos_Aires:${finStr}`,
+        `SUMMARY:${titulo}`,
+        `DESCRIPTION:${objetivo || ""}`,
+        `LOCATION:${donde}`,
+        "STATUS:CONFIRMED",
+        "SEQUENCE:0",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ].join("\r\n");
+
+      const blob = new Blob([ics], { type: "text/calendar" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${tipo}-${index + 1}.ics`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // 🔁 Microacciones
+    datosFlujo.microacciones.forEach((accion, i) => {
+      generarICS(accion, i, "microaccion");
+    });
+
+    // 🔁 Hábitos
+    datosFlujo.habitos.forEach((habito, i) => {
+      generarICS(habito, i, "habito");
+    });
+  }
+
+  function descargarICS(microaccion) {
+    const uid = `${Date.now()}-${Math.random().toString(36).substring(2, 10)}@tablero2025`;
+
+    const [día, hora] = microaccion["cuándo"].split(" ");
+    const duraciónMin = parseInt(microaccion["duración"].replace("min", "").trim()) || 60;
+
+    // Día → número (ej: Lunes = 1)
+    const dias = {
+      "lunes": 1, "martes": 2, "miércoles": 3, "jueves": 4,
+      "viernes": 5, "sábado": 6, "domingo": 0
+    };
+
+    const now = new Date();
+    const dayOffset = (dias[día.toLowerCase()] - now.getDay() + 7) % 7;
+    const eventoDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset);
+
+    const [hh, mm] = hora.split(":").map(Number);
+    eventoDate.setHours(hh, mm, 0);
+
+    const endDate = new Date(eventoDate.getTime() + duraciónMin * 60000);
+
+    const formatoFecha = (fecha) =>
+      fecha.toISOString().replace(/[-:]/g, "").split(".")[0];
+
+    const inicio = formatoFecha(eventoDate);
+    const fin = formatoFecha(endDate);
+    const timestamp = formatoFecha(new Date());
+
+    const ics = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Coach Salud//Tablero Personal//EN",
+      "CALSCALE:GREGORIAN",
+      "METHOD:PUBLISH",
+      "BEGIN:VTIMEZONE",
+      "TZID:America/Argentina/Buenos_Aires",
+      "X-LIC-LOCATION:America/Argentina/Buenos_Aires",
+      "BEGIN:STANDARD",
+      "TZOFFSETFROM:-0300",
+      "TZOFFSETTO:-0300",
+      "TZNAME:-03",
+      "DTSTART:19700101T000000",
+      "END:STANDARD",
+      "END:VTIMEZONE",
+      "BEGIN:VEVENT",
+      `UID:${uid}`,
+      `DTSTAMP:${timestamp}Z`,
+      `DTSTART;TZID=America/Argentina/Buenos_Aires:${inicio}`,
+      `DTEND;TZID=America/Argentina/Buenos_Aires:${fin}`,
+      `SUMMARY:${microaccion["microacción"]}`,
+      `DESCRIPTION:${microaccion["objetivo"]}`,
+      `LOCATION:${microaccion["dónde"]}`,
+      "STATUS:CONFIRMED",
+      "SEQUENCE:0",
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ].join("\r\n");
+
+    const blob = new Blob([ics], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${microaccion["microacción"].replace(/\s+/g, "_")}.ics`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+
+  function descargarHabitoICS(index) {
+    const h = datosFlujo.habitos[index];
+    const uid = `${Date.now()}-habito-${index}@tablero2025`;
+
+    const match = h.cuándo.match(/(Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo)/i);
+    const dayMap = {
+      "lunes": "MO", "martes": "TU", "miércoles": "WE",
+      "jueves": "TH", "viernes": "FR", "sábado": "SA", "domingo": "SU"
+    };
+    const rruleDay = match ? dayMap[match[1].toLowerCase()] : "MO";
+
+    const horaMatch = h.cuándo.match(/(\d{1,2}:\d{2})/);
+    const hora = horaMatch ? horaMatch[1] : "08:00";
+    const [hh, mm] = hora.split(":");
+
+    const start = new Date();
+    start.setHours(hh, mm, 0, 0);
+    const dow = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+    const targetDay = dow.indexOf(match[1].toLowerCase());
+    const offset = (targetDay - start.getDay() + 7) % 7;
+    start.setDate(start.getDate() + offset);
+
+    const pad = n => String(n).padStart(2, '0');
+    const formatDate = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+
+    const dtstart = formatDate(start);
+    const end = new Date(start.getTime() + parseInt(h.duración) * 60000);
+    const dtend = formatDate(end);
+
+    const ics = `BEGIN:VCALENDAR
+  VERSION:2.0
+  PRODID:-//Coach Salud//Tablero Personal//EN
+  CALSCALE:GREGORIAN
+  METHOD:PUBLISH
+  BEGIN:VEVENT
+  UID:${uid}
+  DTSTAMP:${formatDate(new Date())}
+  DTSTART:${dtstart}
+  DTEND:${dtend}
+  RRULE:FREQ=WEEKLY;BYDAY=${rruleDay};UNTIL=${start.getFullYear()}1231T235959Z
+  SUMMARY:${h.hábito}
+  DESCRIPTION:${h.objetivo}
+  LOCATION:${h.dónde}
+  STATUS:CONFIRMED
+  SEQUENCE:0
+  END:VEVENT
+  END:VCALENDAR`;
+
+    const blob = new Blob([ics], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${h.hábito.replace(/\s+/g, "_")}.ics`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function normalizarItem(item) {
+  return {
+    objetivo: item.objetivo,
+    microaccion: item.microacción || item.hábito,
+    cuando: item["cuándo"],
+    donde: item["dónde"],
+    duracion: item["duración"],
+    ics: item.ics || "",
+    kpi: item.kpi || "",
+    target: item.target || "",
+    cumplimiento: item.cumplimiento || ""
+  };
+}
+
+function desnormalizarMicroaccion(item) {
+  return {
+    objetivo: item.objetivo,
+    "microacción": item.microaccion,
+    "cuándo": item.cuando,
+    "dónde": item.donde,
+    "duración": item.duracion,
+    ics: item.ics,
+    kpi: item.kpi,
+    target: item.target,
+    cumplimiento: item.cumplimiento
+  };
+}
+
+function desnormalizarHabito(item) {
+  return {
+    objetivo: item.objetivo,
+    "hábito": item.microaccion,
+    "cuándo": item.cuando,
+    "dónde": item.donde,
+    "duración": item.duracion,
+    ics: item.ics,
+    kpi: item.kpi,
+    target: item.target,
+    cumplimiento: item.cumplimiento
+  };
+}
+function cerrarSemana() {
+  const hoy = new Date();
+  const semanaActual = hoy.toISOString().split("T")[0];
+
+  const microacciones = obtenerFilasComoObjetos("microacciones-body");
+  const habitos = obtenerFilasComoObjetos("habitos-body");
+
+  const historial = [];
+
+  [...microacciones, ...habitos].forEach(item => {
+    historial.push({
+      semana: semanaActual,
+      microaccion: item["microacción"] || item["hábito"],
+      kpi: item.kpi,
+      target: item.target,
+      cumplimiento: item.cumplimiento
+    });
+  });
+
+  const retro = document.getElementById("retro-semanal").value.trim();
+
+  datosFlujo.historial = [...(datosFlujo.historial || []), ...historial];
+  datosFlujo.retro = retro;
+
+  alert("📅 Semana cerrada y guardada en historial");
+}
+function cargarHistorial() {
+  const tbody = document.querySelector("#historial-body tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  if (!datosFlujo.historial || !Array.isArray(datosFlujo.historial)) return;
+
+  datosFlujo.historial.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.semana}</td>
+      <td>${item.microaccion}</td>
+      <td>${item.kpi}</td>
+      <td>${item.target}</td>
+      <td>${item.cumplimiento}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const textarea = document.getElementById("retro-semanal");
+  if (textarea && datosFlujo.retro) {
+    textarea.value = datosFlujo.retro;
+  }
+}
+window.addEventListener("beforeunload", () => {
+  recolectarDatosDesdeDOM();
+  localStorage.setItem("tableroDatos", JSON.stringify(datosFlujo));
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("tableroDatos");
+  if (saved) {
+    datosFlujo = JSON.parse(saved);
+    cargarDatosDesdeJSON();
+  }
+});
+window.addEventListener("DOMContentLoaded", () => {
+  fetch("Tablero-personal-2025.json")
+    .then(res => res.json())
+    .then(data => {
+      datosFlujo = data;
+      cargarDatosDesdeJSON();
+      console.log("✅ JSON cargado automáticamente");
+    })
+    .catch(err => {
+      console.warn("⚠️ No se pudo cargar datos.json:", err);
+    });
+});
+  </script>
+</body>
+</html>
